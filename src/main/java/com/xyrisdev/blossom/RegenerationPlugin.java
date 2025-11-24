@@ -16,6 +16,8 @@ import com.xyrisdev.library.scheduler.XScheduler;
 import com.xyrisdev.library.scheduler.scheduling.schedulers.TaskScheduler;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 public final class RegenerationPlugin extends AbstractPlugin {
 
@@ -41,7 +43,16 @@ public final class RegenerationPlugin extends AbstractPlugin {
 		plugins().registerEvents(new PlayerQuitListener(), this);
 		plugins().registerEvents(new PlayerInteractListener(), this);
 		BlossomCommand.blossom(this).register();
-		PlaceholderAPIHook.of().register();
+		final Plugin placeholderAPI = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+		if (placeholderAPI != null && placeholderAPI.isEnabled()) {
+			try {
+				PlaceholderAPIHook.of().register();
+			} catch (Throwable throwable) {
+				// Fail gracefully instead of crashing the entire plugin enable phase.
+				XLogger.custom().warn("Failed to hook into PlaceholderAPI: " + throwable.getClass().getSimpleName());
+			}
+		}
+		
 	}
 
 	@Override
